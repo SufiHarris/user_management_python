@@ -1,8 +1,6 @@
-from app.models.tenant import TenantMaster
-from app.models.user import UserDetails
-from app.models.role import RoleMaster, UserRoleMapping, RolePermissionMapping, GroupRoleMapping
-from app.models.permission import PermissionMaster, PermissionUserMapping, GroupPermissionMapping
-from app.models.group import GroupMaster, GroupUserMapping
+from app.models.connector import ConnectorMaster
+from app.models.module import ModuleMaster
+from app.models.tenant_subscription import TenantSubscription
 
 __all__ = [
     "TenantMaster",
@@ -15,5 +13,8 @@ __all__ = [
     "RolePermissionMapping",
     "GroupUserMapping",
     "GroupRoleMapping",
-    "GroupPermissionMapping"
+    "GroupPermissionMapping",
+    "ConnectorMaster",
+    "ModuleMaster",
+    "TenantSubscription"
 ]

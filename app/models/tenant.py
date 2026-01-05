@@ -19,3 +19,4 @@ class TenantMaster(Base):
     users = relationship("UserDetails", back_populates="tenant", cascade="all, delete-orphan")
     roles = relationship("RoleMaster", back_populates="tenant", cascade="all, delete-orphan")
     groups = relationship("GroupMaster", back_populates="tenant", cascade="all, delete-orphan")
+    subscriptions = relationship("TenantSubscription", back_populates="tenant", cascade="all, delete-orphan")
