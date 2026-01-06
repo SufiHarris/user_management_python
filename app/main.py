@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.api.v1 import users, roles, permissions, tenants
 from app.api.v1 import connectors, modules, subscriptions
+from app.api.v1 import groups
+
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
@@ -29,6 +31,7 @@ app.include_router(tenants.router, prefix="/api/v1/tenants", tags=["Tenants"])
 app.include_router(connectors.router, prefix="/api/v1/connectors", tags=["Connectors"])
 app.include_router(modules.router, prefix="/api/v1/modules", tags=["Modules"])
 app.include_router(subscriptions.router, prefix="/api/v1/subscriptions", tags=["Subscriptions"])
+app.include_router(groups.router, prefix="/api/v1/groups", tags=["Groups"])
 
 
 @app.get("/")

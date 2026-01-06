@@ -25,3 +25,35 @@ class GroupResponse(GroupBase, TimestampMixin):
 class AssignUserToGroup(BaseModel):
     user_id: UUID
     group_id: UUID
+
+class AssignRoleToGroup(BaseModel):
+    group_id: UUID
+    role_id: UUID
+
+class AssignPermissionToGroup(BaseModel):
+    group_id: UUID
+    permission_id: UUID
+
+class GroupUserMappingResponse(BaseModel):
+    id: UUID
+    group_id: UUID
+    user_id: UUID
+    assigned_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class GroupRoleMappingResponse(BaseModel):
+    id: UUID
+    group_id: UUID
+    role_id: UUID
+    assigned_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class GroupPermissionMappingResponse(BaseModel):
+    id: UUID
+    group_id: UUID
+    permission_id: UUID
+    assigned_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
