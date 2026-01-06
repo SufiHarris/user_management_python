@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey, func, UniqueConstraint
+from sqlalchemy import Column, String, DateTime, Text, ForeignKey, func, UniqueConstraint, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -11,6 +11,7 @@ class GroupMaster(Base):
     tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenant_master.tenant_id", ondelete="CASCADE"), nullable=False, index=True)
     group_name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
@@ -21,6 +22,7 @@ class GroupMaster(Base):
     # Relationships
     tenant = relationship("TenantMaster", back_populates="groups")
     group_users = relationship("GroupUserMapping", back_populates="group", cascade="all, delete-orphan")
+    # These relationships use string references, so they will find the classes in the other files automatically
     group_roles = relationship("GroupRoleMapping", back_populates="group", cascade="all, delete-orphan")
     group_permissions = relationship("GroupPermissionMapping", back_populates="group", cascade="all, delete-orphan")
 
@@ -31,6 +33,7 @@ class GroupUserMapping(Base):
     group_id = Column(UUID(as_uuid=True), ForeignKey("group_master.group_id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("user_details.user_id", ondelete="CASCADE"), nullable=False, index=True)
     assigned_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_active = Column(Boolean, default=True, nullable=False)
     
     __table_args__ = (
         UniqueConstraint('group_id', 'user_id', name='uq_group_user'),

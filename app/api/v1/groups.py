@@ -54,7 +54,7 @@ def list_groups(
     groups = GroupService.get_groups(db, tenant_id=tenant_id, skip=skip, limit=limit)
     return groups
 
-@router.put("/{group_id}", response_model=GroupResponse)
+@router.post("/{group_id}/update", response_model=GroupResponse)
 def update_group(
     group_id: UUID,
     group_data: GroupUpdate,
@@ -64,7 +64,7 @@ def update_group(
     group = GroupService.update_group(db, group_id, group_data)
     return group
 
-@router.delete("/{group_id}", response_model=ResponseBase)
+@router.post("/{group_id}/delete", response_model=ResponseBase)
 def delete_group(
     group_id: UUID,
     db: Session = Depends(get_db)
@@ -88,7 +88,7 @@ def assign_user_to_group(
     )
     return mapping
 
-@router.delete("/remove-user/{group_id}/{user_id}", response_model=ResponseBase)
+@router.post("/remove-user/{group_id}/{user_id}", response_model=ResponseBase)
 def remove_user_from_group(
     group_id: UUID,
     user_id: UUID,
@@ -131,7 +131,7 @@ def assign_role_to_group(
     )
     return mapping
 
-@router.delete("/remove-role/{group_id}/{role_id}", response_model=ResponseBase)
+@router.post("/remove-role/{group_id}/{role_id}", response_model=ResponseBase)
 def remove_role_from_group(
     group_id: UUID,
     role_id: UUID,
@@ -165,7 +165,7 @@ def assign_permission_to_group(
     )
     return mapping
 
-@router.delete("/remove-permission/{group_id}/{permission_id}", response_model=ResponseBase)
+@router.post("/remove-permission/{group_id}/{permission_id}", response_model=ResponseBase)
 def remove_permission_from_group(
     group_id: UUID,
     permission_id: UUID,

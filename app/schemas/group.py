@@ -14,10 +14,12 @@ class GroupCreate(GroupBase):
 class GroupUpdate(BaseModel):
     group_name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = None
+    is_active: Optional[bool] = None # Added
 
 class GroupResponse(GroupBase, TimestampMixin):
     group_id: UUID
     tenant_id: UUID
+    is_active: bool # Added
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,6 +40,7 @@ class GroupUserMappingResponse(BaseModel):
     id: UUID
     group_id: UUID
     user_id: UUID
+    is_active: bool # Added
     assigned_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -46,6 +49,7 @@ class GroupRoleMappingResponse(BaseModel):
     id: UUID
     group_id: UUID
     role_id: UUID
+    is_active: bool # Added
     assigned_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -54,6 +58,7 @@ class GroupPermissionMappingResponse(BaseModel):
     id: UUID
     group_id: UUID
     permission_id: UUID
+    is_active: bool # Added
     assigned_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
