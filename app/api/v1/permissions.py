@@ -49,7 +49,7 @@ def list_permissions(
     permissions = PermissionService.get_permissions(db, resource=resource, skip=skip, limit=limit)
     return permissions
 
-@router.put("/{permission_id}", response_model=PermissionResponse)
+@router.post("/{permission_id}/update", response_model=PermissionResponse)
 def update_permission(
     permission_id: UUID,
     permission_data: PermissionUpdate,
@@ -59,7 +59,7 @@ def update_permission(
     permission = PermissionService.update_permission(db, permission_id, permission_data)
     return permission
 
-@router.delete("/{permission_id}", response_model=ResponseBase)
+@router.post("/{permission_id}/delete", response_model=ResponseBase)
 def delete_permission(
     permission_id: UUID,
     db: Session = Depends(get_db)

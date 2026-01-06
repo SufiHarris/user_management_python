@@ -50,7 +50,7 @@ def list_roles(
     roles = RoleService.get_roles(db, tenant_id=tenant_id, skip=skip, limit=limit)
     return roles
 
-@router.put("/{role_id}", response_model=RoleResponse)
+@router.post("/{role_id}/update", response_model=RoleResponse)
 def update_role(
     role_id: UUID,
     role_data: RoleUpdate,
@@ -60,7 +60,7 @@ def update_role(
     role = RoleService.update_role(db, role_id, role_data)
     return role
 
-@router.delete("/{role_id}", response_model=ResponseBase)
+@router.post("/{role_id}/delete", response_model=ResponseBase)
 def delete_role(
     role_id: UUID,
     db: Session = Depends(get_db)
@@ -82,7 +82,7 @@ def assign_role_to_user(
     )
     return mapping
 
-@router.delete("/remove-user/{user_id}/{role_id}", response_model=ResponseBase)
+@router.post("/remove-user/{user_id}/{role_id}", response_model=ResponseBase)
 def remove_role_from_user(
     user_id: UUID,
     role_id: UUID,

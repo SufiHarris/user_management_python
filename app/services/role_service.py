@@ -6,12 +6,25 @@ from fastapi import HTTPException, status
 from app.models.role import RoleMaster, UserRoleMapping, RolePermissionMapping
 from app.models.user import UserDetails
 from app.models.permission import PermissionMaster
+from app.models.tenant import TenantMaster  # <--- Added Import
 from app.schemas.role import RoleCreate, RoleUpdate
 
 class RoleService:
     @staticmethod
     def create_role(db: Session, role_data: RoleCreate) -> RoleMaster:
         """Create a new role"""
+        # 1. Check if Tenant exists and is ACTIVE
+        tenant = db.query(TenantMaster).filter(
+            TenantMaster.tenant_id == role_data.tenant_id,
+            TenantMaster.is_active == True
+        ).first()
+        
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tenant not found or inactive"
+            )
+
         try:
             db_role = RoleMaster(
                 tenant_id=role_data.tenant_id,
@@ -35,12 +48,12 @@ class RoleService:
     
     @staticmethod
     def get_role_by_id(db: Session, role_id: UUID) -> Optional[RoleMaster]:
-        """Get role by ID"""
+        """Get role by ID (Allows fetching inactive roles)"""
         return db.query(RoleMaster).filter(RoleMaster.role_id == role_id).first()
     
     @staticmethod
     def get_roles(db: Session, tenant_id: Optional[UUID] = None, skip: int = 0, limit: int = 100) -> List[RoleMaster]:
-        """Get list of roles"""
+        """Get list of ACTIVE roles"""
         query = db.query(RoleMaster)
         
         if tenant_id:
@@ -60,10 +73,11 @@ class RoleService:
             )
         
         if db_role.is_system_role:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot modify system role"
-            )
+             if role_data.is_active is False:
+                 raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot deactivate system role"
+                 )
         
         update_data = role_data.model_dump(exclude_unset=True)
         
@@ -84,8 +98,11 @@ class RoleService:
     
     @staticmethod
     def delete_role(db: Session, role_id: UUID) -> bool:
-        """Delete role"""
-        db_role = db.query(RoleMaster).filter(RoleMaster.role_id == role_id).first()
+        """Soft delete role"""
+        db_role = db.query(RoleMaster).filter(
+            RoleMaster.role_id == role_id,
+            RoleMaster.is_active == True
+        ).first()
         
         if not db_role:
             raise HTTPException(
@@ -99,27 +116,33 @@ class RoleService:
                 detail="Cannot delete system role"
             )
         
-        db.delete(db_role)
+        db_role.is_active = False
         db.commit()
         return True
     
     @staticmethod
     def assign_role_to_user(db: Session, user_id: UUID, role_id: UUID, assigned_by: Optional[UUID] = None) -> UserRoleMapping:
         """Assign role to user"""
-        # Check if user exists
-        user = db.query(UserDetails).filter(UserDetails.user_id == user_id).first()
+        # Check if user exists AND is active
+        user = db.query(UserDetails).filter(
+            UserDetails.user_id == user_id,
+            UserDetails.is_active == True
+        ).first()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                detail="User not found or inactive"
             )
         
-        # Check if role exists
-        role = db.query(RoleMaster).filter(RoleMaster.role_id == role_id).first()
+        # Check if role exists AND is active
+        role = db.query(RoleMaster).filter(
+            RoleMaster.role_id == role_id,
+            RoleMaster.is_active == True
+        ).first()
         if not role:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Role not found"
+                detail="Role not found or inactive"
             )
         
         # Check if user and role belong to same tenant
@@ -129,17 +152,25 @@ class RoleService:
                 detail="User and role must belong to the same tenant"
             )
         
-        # Check if already assigned
+        # Check if already assigned (any state)
         existing = db.query(UserRoleMapping).filter(
             UserRoleMapping.user_id == user_id,
             UserRoleMapping.role_id == role_id
         ).first()
         
         if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Role already assigned to user"
-            )
+            if existing.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Role already assigned to user"
+                )
+            else:
+                # Reactivate assignment
+                existing.is_active = True
+                existing.assigned_by = assigned_by
+                db.commit()
+                db.refresh(existing)
+                return existing
         
         try:
             mapping = UserRoleMapping(
@@ -163,10 +194,11 @@ class RoleService:
     
     @staticmethod
     def remove_role_from_user(db: Session, user_id: UUID, role_id: UUID) -> bool:
-        """Remove role from user"""
+        """Soft remove role from user"""
         mapping = db.query(UserRoleMapping).filter(
             UserRoleMapping.user_id == user_id,
-            UserRoleMapping.role_id == role_id
+            UserRoleMapping.role_id == role_id,
+            UserRoleMapping.is_active == True
         ).first()
         
         if not mapping:
@@ -175,15 +207,17 @@ class RoleService:
                 detail="Role assignment not found"
             )
         
-        db.delete(mapping)
+        mapping.is_active = False
         db.commit()
         return True
     
     @staticmethod
     def get_user_roles(db: Session, user_id: UUID) -> List[RoleMaster]:
-        """Get all roles assigned to a user"""
+        """Get all active roles assigned to a user"""
         return db.query(RoleMaster).join(
             UserRoleMapping, UserRoleMapping.role_id == RoleMaster.role_id
         ).filter(
-            UserRoleMapping.user_id == user_id
+            UserRoleMapping.user_id == user_id,
+            UserRoleMapping.is_active == True,
+            RoleMaster.is_active == True
         ).all()

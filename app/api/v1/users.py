@@ -82,7 +82,7 @@ def list_users(
     users = UserService.get_users(db, tenant_id=tenant_id, skip=skip, limit=limit)
     return users
 
-@router.put("/{user_id}", response_model=UserResponse)
+@router.post("/{user_id}/update", response_model=UserResponse)
 def update_user(
     user_id: UUID,
     user_data: UserUpdate,
@@ -92,7 +92,7 @@ def update_user(
     user = UserService.update_user(db, user_id, user_data)
     return user
 
-@router.delete("/{user_id}", response_model=ResponseBase)
+@router.post("/{user_id}/delete", response_model=ResponseBase)
 def delete_user(
     user_id: UUID,
     db: Session = Depends(get_db)

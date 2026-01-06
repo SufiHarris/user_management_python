@@ -47,7 +47,7 @@ def list_subscriptions(
     subscriptions = TenantSubscriptionService.get_subscriptions(db, tenant_id=tenant_id, skip=skip, limit=limit)
     return subscriptions
 
-@router.put("/{subscription_id}", response_model=TenantSubscriptionResponse)
+@router.post("/{subscription_id}/update", response_model=TenantSubscriptionResponse)
 def update_subscription(
     subscription_id: UUID,
     subscription_data: TenantSubscriptionUpdate,
@@ -57,7 +57,7 @@ def update_subscription(
     subscription = TenantSubscriptionService.update_subscription(db, subscription_id, subscription_data)
     return subscription
 
-@router.delete("/{subscription_id}", response_model=ResponseBase)
+@router.post("/{subscription_id}/delete", response_model=ResponseBase)
 def delete_subscription(
     subscription_id: UUID,
     db: Session = Depends(get_db)

@@ -45,7 +45,7 @@ def list_modules(
     modules = ModuleService.get_modules(db, skip=skip, limit=limit)
     return modules
 
-@router.put("/{module_id}", response_model=ModuleResponse)
+@router.post("/{module_id}/update", response_model=ModuleResponse)
 def update_module(
     module_id: UUID,
     module_data: ModuleUpdate,
@@ -55,7 +55,7 @@ def update_module(
     module = ModuleService.update_module(db, module_id, module_data)
     return module
 
-@router.delete("/{module_id}", response_model=ResponseBase)
+@router.post("/{module_id}/delete", response_model=ResponseBase)
 def delete_module(
     module_id: UUID,
     db: Session = Depends(get_db)

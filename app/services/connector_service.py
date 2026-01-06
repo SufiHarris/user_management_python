@@ -85,6 +85,6 @@ class ConnectorService:
                 detail="Connector not found"
             )
         
-        db.delete(db_connector)
+        db_connector.is_active = False
         db.commit()
         return True

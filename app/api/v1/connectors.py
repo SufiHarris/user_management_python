@@ -45,7 +45,7 @@ def list_connectors(
     connectors = ConnectorService.get_connectors(db, skip=skip, limit=limit)
     return connectors
 
-@router.put("/{connector_id}", response_model=ConnectorResponse)
+@router.post("/{connector_id}/update", response_model=ConnectorResponse)
 def update_connector(
     connector_id: UUID,
     connector_data: ConnectorUpdate,
@@ -55,7 +55,7 @@ def update_connector(
     connector = ConnectorService.update_connector(db, connector_id, connector_data)
     return connector
 
-@router.delete("/{connector_id}", response_model=ResponseBase)
+@router.post("/{connector_id}/delete", response_model=ResponseBase)
 def delete_connector(
     connector_id: UUID,
     db: Session = Depends(get_db)

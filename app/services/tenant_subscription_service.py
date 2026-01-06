@@ -12,20 +12,20 @@ class TenantSubscriptionService:
     @staticmethod
     def create_subscription(db: Session, subscription_data: TenantSubscriptionCreate, created_by: Optional[UUID] = None) -> TenantSubscription:
         """Create a new tenant subscription"""
-        # Check if tenant exists
+        # Check if tenant exists AND is active
         tenant = db.query(TenantMaster).filter(TenantMaster.tenant_id == subscription_data.tenant_id).first()
-        if not tenant:
+        if not tenant or not tenant.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Tenant not found"
+                detail="Tenant not found or inactive"
             )
         
-        # Check if module exists
+        # Check if module exists AND is active
         module = db.query(ModuleMaster).filter(ModuleMaster.module_id == subscription_data.module_id).first()
-        if not module:
+        if not module or not module.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Module not found"
+                detail="Module not found or inactive"
             )
         
         # Check if subscription already exists
@@ -117,7 +117,7 @@ class TenantSubscriptionService:
                 detail="Subscription not found"
             )
         
-        db.delete(db_subscription)
+        db_subscription.is_active = False
         db.commit()
         return True
     

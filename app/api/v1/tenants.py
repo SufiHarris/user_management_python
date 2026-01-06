@@ -45,7 +45,7 @@ def list_tenants(
     tenants = TenantService.get_tenants(db, skip=skip, limit=limit)
     return tenants
 
-@router.put("/{tenant_id}", response_model=TenantResponse)
+@router.post("/{tenant_id}/update", response_model=TenantResponse)
 def update_tenant(
     tenant_id: UUID,
     tenant_data: TenantUpdate,
@@ -55,7 +55,7 @@ def update_tenant(
     tenant = TenantService.update_tenant(db, tenant_id, tenant_data)
     return tenant
 
-@router.delete("/{tenant_id}", response_model=ResponseBase)
+@router.post("/{tenant_id}/delete", response_model=ResponseBase)
 def delete_tenant(
     tenant_id: UUID,
     db: Session = Depends(get_db)

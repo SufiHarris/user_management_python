@@ -131,7 +131,7 @@ class UserService:
                 detail="User not found"
             )
         
-        db.delete(db_user)
+        db_user.is_active = False
         db.commit()
         return True
     

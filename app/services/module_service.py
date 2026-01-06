@@ -80,6 +80,6 @@ class ModuleService:
                 detail="Module not found"
             )
         
-        db.delete(db_module)
+        db_module.is_active = False
         db.commit()
         return True
